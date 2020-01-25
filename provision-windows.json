@@ -1,0 +1,55 @@
+{
+  "variables": {
+    "base_ami_id": ""
+  },
+
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "region": "us-west-2",
+      "source_ami": "{{user `base_ami_id`}}",
+	 
+	  "ssh_keypair_name": "tago",
+	  "ssh_private_key_file": "tago.pem",
+      "instance_type": "t2.small",
+      "communicator": "winrm",
+      "winrm_username": "Administrator",
+      "ami_name": "WindowsAMI-{{isotime \"2006-01-02\"}}",
+      "user_data_file": "template/setup_winrm.txt",
+      "ami_block_device_mappings": [ {
+            "device_name": "/dev/sda1",
+            "volume_type": "gp2",
+            "volume_size": 30,
+            "delete_on_termination": true
+        } ],
+        "launch_block_device_mappings": [ {
+            "device_name": "/dev/sda1",
+            "volume_type": "gp2",
+            "volume_size": 30,
+            "delete_on_termination": true
+        } ]
+    }
+  ],
+
+  "provisioners" : [
+  
+    {
+      "type": "file",
+      "source": "template/install_programs.ps1",
+      "destination": "C:\\Users\\Administrator\\install_programs.ps1"
+    },
+    {
+      "type": "file",
+      "source": "template/softwareToInstall.json",
+      "destination": "C:\\Users\\Administrator\\softwareToInstall.json"
+    },
+    {
+      "type": "powershell",
+      "inline": ["Powershell -NonInteractive -File \"C:\\Users\\Administrator\\install_programs.ps1\" -json \"C:\\Users\\Administrator\\softwareToInstall.json\""]
+    },
+    {
+      "type": "windows-shell",
+      "inline": ["tzutil /s \"AUS Eastern Standard Time\""]
+    }
+  ]
+}

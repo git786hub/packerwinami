@@ -1,0 +1,1 @@
+packer build -var "base_ami_id=ami-0a1d405ce719bebfd" provision-windows.json
